@@ -56,11 +56,10 @@ def _set_actor(user, sender, instance, signal_duid, **kwargs):
         if signal_duid != auditlog["signal_duid"]:
             return
         auth_user_model = get_user_model()
-        if (
-            sender == LogEntry
-            and isinstance(user, auth_user_model)
-            and instance.actor is None
-        ):
+
+        if isinstance(user, str) and sender == LogEntry and instance.author is None or instance.author == '':
+            instance.author = user
+        if sender == LogEntry and isinstance(user, auth_user_model) and instance.actor is None:
             instance.actor = user
 
         instance.remote_addr = auditlog["remote_addr"]
