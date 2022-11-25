@@ -30,15 +30,15 @@ class AuditlogMiddleware:
         return remote_addr
 
     @staticmethod
-    def _get_aggregator_user_from_headers(request):
-        return request.headers.get("Aggregator-User", None) if hasattr(request, "headers") else None
+    def _get_author_from_headers(request):
+        return request.headers.get("Author", None) if hasattr(request, "headers") else None
 
     def __call__(self, request):
         remote_addr = self._get_remote_addr(request)
-        aggregator_user = self._get_aggregator_user_from_headers(request)
+        author = self._get_author_from_headers(request)
 
-        if aggregator_user:
-            context = set_actor(actor=aggregator_user, remote_addr=remote_addr)
+        if author:
+            context = set_actor(actor=author, remote_addr=remote_addr)
         elif hasattr(request, "user") and request.user.is_authenticated:
             context = set_actor(actor=request.user, remote_addr=remote_addr)
         else:
