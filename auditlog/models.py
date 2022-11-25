@@ -351,6 +351,9 @@ class LogEntry(models.Model):
         related_name="+",
         verbose_name=_("actor"),
     )
+    author = models.CharField(
+        max_length=255, verbose_name=_("author"), blank=True, default='',
+    )
     remote_addr = models.GenericIPAddressField(
         blank=True, null=True, verbose_name=_("remote address")
     )
