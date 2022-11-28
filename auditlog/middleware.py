@@ -37,10 +37,10 @@ class AuditlogMiddleware:
         remote_addr = self._get_remote_addr(request)
         author = self._get_author_from_headers(request)
 
-        if author:
-            context = set_actor(actor=author, remote_addr=remote_addr)
-        elif hasattr(request, "user") and request.user.is_authenticated:
-            context = set_actor(actor=request.user, remote_addr=remote_addr)
+        if hasattr(request, "user") and request.user.is_authenticated:
+            context = set_actor(actor=request.user, remote_addr=remote_addr, author=author)
+        elif author:
+            context = set_actor(actor=None, remote_addr=remote_addr, author=author)
         else:
             context = contextlib.nullcontext()
 

@@ -12,7 +12,7 @@ threadlocal = threading.local()
 
 
 @contextlib.contextmanager
-def set_actor(actor, remote_addr=None):
+def set_actor(actor, remote_addr=None, author=None):
     """Connect a signal receiver with current user attached."""
     # Initialize thread local storage
     threadlocal.auditlog = {
@@ -22,7 +22,7 @@ def set_actor(actor, remote_addr=None):
 
     # Connect signal for automatic logging
     set_actor = partial(
-        _set_actor, user=actor, signal_duid=threadlocal.auditlog["signal_duid"]
+        _set_actor, user=actor, signal_duid=threadlocal.auditlog["signal_duid"], author=author
     )
     pre_save.connect(
         set_actor,
@@ -43,7 +43,7 @@ def set_actor(actor, remote_addr=None):
             del threadlocal.auditlog
 
 
-def _set_actor(user, sender, instance, signal_duid, **kwargs):
+def _set_actor(user, sender, instance, signal_duid, author, **kwargs):
     """Signal receiver with extra 'user' and 'signal_duid' kwargs.
 
     This function becomes a valid signal receiver when it is curried with the actor and a dispatch id.
@@ -57,10 +57,10 @@ def _set_actor(user, sender, instance, signal_duid, **kwargs):
             return
         auth_user_model = get_user_model()
 
-        if isinstance(user, str) and sender == LogEntry and instance.author is None or instance.author == '':
-            instance.author = user
         if sender == LogEntry and isinstance(user, auth_user_model) and instance.actor is None:
             instance.actor = user
+        if author and sender == LogEntry and not instance.author:
+            instance.author = author
 
         instance.remote_addr = auditlog["remote_addr"]
 
